@@ -519,6 +519,14 @@ class SHT(DumbEnum):
 	SHT_HISUNW = 0x6fffffff, 'Sun-specific high bound.'
 	SHT_HIOS = 0x6fffffff, ''
 	SHT_LOPROC = 0x70000000, ''
+	SHT_ARM_EXIDX = 0x70000001, ''
+	SHT_ARM_PREEMPTMAP = 0x70000002, ''
+	SHT_ARM_ATTRIBUTES = 0x70000003, ''
+	SHT_ARM_DEBUGOVERLAY = 0x70000004, ''
+	SHT_ARM_OVERLAYSECTION = 0x70000005, ''
+	SHT_MIPS_REGINFO = 0x70000006, ''
+	SHT_MIPS_OPTIONS = 0x7000000d, ''
+	SHT_MIPS_ABIFLAGS = 0x7000002a, ''
 	SHT_HIPROC = 0x7fffffff, ''
 	SHT_LOUSER = 0x80000000, ''
 	SHT_HIUSER = 0xffffffff, ''
@@ -544,7 +552,7 @@ class SHF(DumbEnum):
 	SHF_TLS = 0x400, 'section holds Thread-Local Storage'
 	SHF_MASKOS = 0x0ff00000, 'All bits included in this mask are reserved for operating system-specific semantics'
 	SHF_MASKPROC = 0xf0000000, 'All bits included in this mask are reserved for processor-specific semantics'
-	SHF_ORDERED = (1 << 30), 'Special ordering requirement (Solaris).'
+	SHF_ORDERED = (1 << 30), 'Special orderinSHT_PROGBITSg requirement (Solaris).'
 	SHF_EXCLUDE = (1 << 31), 'Section is excluded unless referenced or allocated (Solaris).'
 
 class PT(DumbEnum):

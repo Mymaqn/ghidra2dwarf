@@ -9,3 +9,4 @@ __pycache__/
 idata/
 
 /test/binaries/*_dbg*
+/lib/target

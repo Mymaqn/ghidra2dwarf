@@ -489,9 +489,25 @@ def generate_dwarf_sections():
         print section_index, section_name, length
     return sections.items()
 
+def get_arch(decompiler):
+    lang = str(decompiler.getLanguage())
+    if ('x86' and '64') in lang:
+        lang = "x86_64"
+    elif 'ARM' in lang:
+        lang = "arm"
+    elif 'MIPS' in lang:
+        lang = "mips"
+    else:
+        print("Arch not supported")
+        exit(0)
+    return lang
+
+
 
 if __name__ == "__main__":
     decompiler = generate_decomp_interface()
+    lang = get_arch(decompiler)
+
     register_mappings, stack_register_dwarf = generate_register_mappings()
     dbg = PointerByReference()
     err = PointerByReference()
@@ -502,7 +518,7 @@ if __name__ == "__main__":
         None,
         None,
         None,
-        "x86_64",
+        lang,
         "V2",
         None,
         dbg,
