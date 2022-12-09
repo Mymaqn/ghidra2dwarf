@@ -552,7 +552,7 @@ class SHF(DumbEnum):
 	SHF_TLS = 0x400, 'section holds Thread-Local Storage'
 	SHF_MASKOS = 0x0ff00000, 'All bits included in this mask are reserved for operating system-specific semantics'
 	SHF_MASKPROC = 0xf0000000, 'All bits included in this mask are reserved for processor-specific semantics'
-	SHF_ORDERED = (1 << 30), 'Special orderinSHT_PROGBITSg requirement (Solaris).'
+	SHF_ORDERED = (1 << 30), 'Special ordering requirement (Solaris).'
 	SHF_EXCLUDE = (1 << 31), 'Section is excluded unless referenced or allocated (Solaris).'
 
 class PT(DumbEnum):
