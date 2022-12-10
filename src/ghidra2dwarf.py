@@ -73,7 +73,11 @@ while not os.path.isfile(exe_path):
     print "Changed binary path to %s." % exe_path
 
 out_path = exe_path + "_dbg"
-decompiled_c_path = exe_path + "_dbg.c"
+relative_dir_path = exe_path.split("/")[-1] + "_src/"
+decompiled_dir_path = "/".join(exe_path.split("/")[:-1]) + "/" + exe_path.split("/")[-1] + "_src/"
+if(not os.path.exists(decompiled_dir_path)):
+    os.mkdir(decompiled_dir_path)
+
 decomp_lines = []
 
 ERR_IS_NOT_OK = lambda e: e != DW_DLV_OK
@@ -131,16 +135,16 @@ def add_debug_info():
     dwarf_pro_set_default_string_form(dbg, DW_FORM_string)
     cu = dwarf_new_die(dbg, DW_TAG_compile_unit, None, None, None, None)
 
-    c_file_name = os.path.split(decompiled_c_path)[1]
-    dwarf_add_AT_name(cu, c_file_name)
-    dir_index = dwarf_add_directory_decl(dbg, ".")
-    file_index = dwarf_add_file_decl(dbg, c_file_name, dir_index, 0, 0)
-    dwarf_add_AT_comp_dir(cu, ".")
-
     funcs = get_functions()
+    dwarf_add_AT_name(cu, "DUMMY") #I think this is needed but I got no fucking clue why
+    dir_index = dwarf_add_directory_decl(dbg, "./"+relative_dir_path[:-1])
+
     for i, f in enumerate(funcs):
         print "Decompiling function %d: %s" % (i, f)
-        add_function(cu, f, file_index)
+        c_file_name = str(f) + ".c"
+        file_index = dwarf_add_file_decl(dbg, c_file_name, dir_index, 0, 0)
+        #dwarf_add_AT_comp_dir(cu, "."). IDK why this was here in the first place. But it's not needed :kek:
+        add_function(cu, f, file_index, decompiled_dir_path+c_file_name)
 
     dwarf_add_die_to_debug_a(dbg, cu)
     add_global_variables(cu)
@@ -302,7 +306,7 @@ def add_variable(cu, func_die, name, datatype, addr, storage, is_parameter=False
     return var_die
 
 
-def add_function(cu, func, file_index):
+def add_function(cu, func, file_index,filename):
     die = dwarf_new_die(dbg, DW_TAG_subprogram, cu, None, None, None)
     loc_expr = dwarf_new_expr(dbg)
     dwarf_add_expr_gen(loc_expr, DW_OP_call_frame_cfa, 0, 0)
@@ -320,15 +324,15 @@ def add_function(cu, func, file_index):
     dwarf_add_AT_targ_address(dbg, die, DW_AT_low_pc, f_start, 0)
     dwarf_add_AT_targ_address(dbg, die, DW_AT_high_pc, f_end - 1, 0)
 
-    func_line = len(decomp_lines) + 1
+    func_line = 1
 
     res = get_decompiled_function(func)
     if res.decompiledFunction is None:
         d = "/* Error decompiling %s: %s */" % (func.getName(True), res.errorMessage)
     else:
         d = res.decompiledFunction.c
-    decomp_lines.extend(d.split("\n"))
-
+    
+    write_source(filename,d)
     dwarf_add_AT_unsigned_const(dbg, die, DW_AT_decl_file, file_index)
     dwarf_add_AT_unsigned_const(dbg, die, DW_AT_decl_line, func_line)
     dwarf_add_line_entry(dbg, file_index, f_start, func_line, 0, True, False)
@@ -338,9 +342,9 @@ def add_function(cu, func, file_index):
     return die
 
 
-def write_source():
-    with open(decompiled_c_path, "wb") as src:
-        src.write("\n".join(decomp_lines).encode("utf8"))
+def write_source(pathname,func):
+    with open(pathname, "wb") as src:
+        src.write(func)
 
 
 def add_type(cu, t):
@@ -525,10 +529,9 @@ if __name__ == "__main__":
     )
     dbg = Dwarf_P_Debug(dbg.value)
     add_debug_info()
-    write_source()
     sections = generate_dwarf_sections()
     dwarf_producer_finish_a(dbg)
     add_sections_to_elf(exe_path, out_path, sections)
     print "Done."
     print "ELF saved to", out_path
-    print "C source saved to", decompiled_c_path
+    print "C source saved to", decompiled_dir_path

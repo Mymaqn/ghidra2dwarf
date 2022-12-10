@@ -10,3 +10,4 @@ idata/
 
 /test/binaries/*_dbg*
 /lib/target
+/release
